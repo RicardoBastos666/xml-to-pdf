@@ -1,0 +1,29 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Table Example</title>
+    <link rel="stylesheet" type="text/css" href="/style.css">
+  </head>
+  <body>
+    <table>
+      <thead>
+        <tr>
+          <th>SAP Code</th>
+          <th>Description</th>
+          <th>Quantity</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% data.row.forEach(item=> { %>
+        <tr>
+          <td><%= item.sap_code %></td>
+          <td><%= item.description %></td>
+          <td><%= item.quantity %></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </body>
+</html>

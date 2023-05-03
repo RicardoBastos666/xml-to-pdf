@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data>
+  <row>
+    <sap_code>737409</sap_code>
+    <description>HPL WEN M9006 LP 0,7 2250X1010 C/ PEL</description>
+    <quantity>175</quantity>
+  </row>
+  <row>
+    <sap_code>692623</sap_code>
+    <description>HPL BR 3103 DOGAL 0,7 2250X950 C/ PEL</description>
+    <quantity>88</quantity>
+  </row>
+  <row>
+    <sap_code>735226</sap_code>
+    <description>HPL CZSILVER L2200 LP 0,7 2000X950 C/PEL</description>
+    <quantity>24</quantity>
+  </row>
+  <row> 
+    <sap_code>782581</sap_code>
+    <description>HPL EGGER H1725 ST10 0,8 2150X950</description>
+    <quantity>19</quantity>
+  </row>
+  <row>
+    <sap_code>783875</sap_code>
+    <description>HPL EGGER PINPRE H3081 ST22 0,8 2150X950</description>
+    <quantity>16</quantity>
+  </row>
+  <row>
+    <sap_code>934259</sap_code>
+    <description>HPL CAR M999 LP 1,2 2062X900 C/PEL</description>
+    <quantity>288</quantity>
+  </row>
+</data>

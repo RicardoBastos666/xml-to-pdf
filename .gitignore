@@ -1,0 +1,19 @@
+.env
+node_modules
+
+# Ignore build files
+build/
+dist/
+bin/
+
+# Ignore configuration files
+config.yml
+secrets.txt
+
+# Ignore IDE files
+.vscode/
+.idea/
+
+# Ignore temporary files
+*.log
+*.tmp
