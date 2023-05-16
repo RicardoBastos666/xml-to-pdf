@@ -1,0 +1,293 @@
+//html table only no pdf
+
+const express = require('express');
+const xml2js = require('xml2js');
+const ejs = require('ejs');
+const fs = require('fs');
+const PORT = 3000;
+
+const app = express();
+app.use(express.static('public'));
+app.set('view engine', 'ejs');
+
+app.get('/', (req, res) => {
+  // Read the XML file
+  fs.readFile('info_stocks.xml', 'utf-8', (err, xmlData) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Error reading XML file');
+    }
+
+    console.log('xmlData:', xmlData);
+
+    // Parse the XML data into a JavaScript object
+    xml2js.parseString(xmlData, (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send('Error parsing XML data');
+      }
+
+      console.log('parsed XML data:', result);
+
+      // Render the EJS template with the data
+      res.render('index', { data: result.data });
+    });
+  });
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
+});
+
+
+//generate pdf only by acessing the route
+
+
+const express = require('express');
+const xml2js = require('xml2js');
+const ejs = require('ejs');
+const PDFDocument = require('pdfkit');
+const fs = require('fs');
+const path = require('path');
+const pdf = require('html-pdf');
+const PORT = 3000;
+const app = express();
+app.use(express.static('public'));
+app.set('view engine', 'ejs');
+
+app.get('/', (req, res) => {
+  // Read the XML file
+  fs.readFile('info_stocks.xml', 'utf-8', (err, xmlData) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Error reading XML file');
+    }
+
+    console.log('xmlData:', xmlData);
+
+    // Parse the XML data into a JavaScript object
+    xml2js.parseString(xmlData, (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send('Error parsing XML data');
+      }
+
+      console.log('parsed XML data:', result);
+      // Render the EJS template with the data
+      res.render('index', { data: result.data }, (err, html) => {
+        if (err) {
+          console.error(err);
+          return res.status(500).send('Error rendering EJS template');
+        }
+
+        // Generate the PDF document from the HTML string
+        const options = {
+          format: 'Letter'
+        };
+        pdf.create(html, options).toFile(path.join(__dirname, 'output.pdf'), (err, res) => {
+          if (err) {
+            console.error(err);
+            return res.status(500).send('Error generating PDF document');
+          }
+
+          console.log(res);
+        });
+      });
+
+    });
+  });
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
+});
+
+
+//this renders the html in JavaScript
+const express = require('express');
+const xml2js = require('xml2js');
+const ejs = require('ejs');
+const fs = require('fs');
+const pdf = require('html-pdf');
+const PORT = 3000;
+
+const app = express();
+app.use(express.static('public'));
+app.set('view engine', 'ejs');
+
+app.get('/', (req, res) => {
+  // Read the XML file
+  fs.readFile('info_stocks.xml', 'utf-8', (err, xmlData) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Error reading XML file');
+    }
+
+    console.log('xmlData:', xmlData);
+
+    // Parse the XML data into a JavaScript object
+    xml2js.parseString(xmlData, (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send('Error parsing XML data');
+      }
+
+      console.log('parsed XML data:', result);
+
+      // Render the EJS template with the data
+      res.render('index', { data: result.data });
+    });
+  });
+});
+
+app.get('/download-pdf', (req, res) => {
+  // Read the XML file
+  fs.readFile('info_stocks.xml', 'utf-8', (err, xmlData) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Error reading XML file');
+    }
+
+    console.log('xmlData:', xmlData);
+
+    // Parse the XML data into a JavaScript object
+    xml2js.parseString(xmlData, (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send('Error parsing XML data');
+      }
+
+      console.log('parsed XML data:', result);
+
+      // Render the EJS template with the data
+      const html = ejs.render(`<html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Table Example</title>
+          <style>
+            table, th, td {
+              border: 1px solid black;
+            }
+          </style>
+        </head>
+        <body>
+          <table>
+            <thead>
+              <tr>
+                <th>SAP Code</th>
+                <th>Description</th>
+                <th>Quantity</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% data.row.forEach(item=> { %>
+              <tr>
+                <td><%= item.sap_code %></td>
+                <td><%= item.description %></td>
+                <td><%= item.quantity %></td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </body>
+      </html>`, { data: result.data });
+
+      // Set the PDF options
+      const options = { format: 'Letter' };
+
+      // Generate the PDF and send it as a response
+      pdf.create(html, options).toStream((err, stream) => {
+        if (err) {
+          console.error(err);
+          return res.status(500).send('Error generating PDF');
+        }
+
+        res.setHeader('Content-Type', 'application/pdf');
+        stream.pipe(res);
+      });
+    });
+  });
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
+});
+
+
+
+//new try
+
+const express = require('express');
+const xml2js = require('xml2js');
+const ejs = require('ejs');
+const fs = require('fs');
+const pdf = require('html-pdf');
+const PORT = 3000;
+
+const app = express();
+app.use(express.static('public'));
+app.set('view engine', 'ejs');
+
+app.get('/', (req, res) => {
+  // Read the XML file
+  fs.readFile('info_stocks.xml', 'utf-8', (err, xmlData) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Error reading XML file');
+    }
+
+    console.log('xmlData:', xmlData);
+
+    // Parse the XML data into a JavaScript object
+    xml2js.parseString(xmlData, (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send('Error parsing XML data');
+      }
+
+      console.log('parsed XML data:', result);
+
+      // Render the EJS template with the data
+      res.render('index', { data: result.data });
+    });
+  });
+});
+
+// New route to generate PDF from existing EJS view
+app.get('/download-pdf', (req, res) => {
+  // Render the EJS view to HTML
+  ejs.renderFile('views/index.ejs', { data: req.query.data }, (err, html) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Error rendering EJS view to HTML');
+    }
+
+    // Options for PDF generation
+    const options = {
+      format: 'Letter',
+      border: {
+        top: '1in',
+        right: '1in',
+        bottom: '1in',
+        left: '1in'
+      }
+    };
+
+    // Generate PDF from HTML
+    pdf.create(html, options).toBuffer((err, buffer) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send('Error generating PDF from HTML');
+      }
+
+      // Send PDF back to client as downloadable file
+      res.setHeader('Content-Disposition', 'attachment; filename="table.pdf"');
+      res.setHeader('Content-Type', 'application/pdf');
+      res.send(buffer);
+    });
+  });
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
+});

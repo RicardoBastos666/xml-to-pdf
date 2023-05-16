@@ -16,14 +16,18 @@
         </tr>
       </thead>
       <tbody>
-        <% data.row.forEach(item=> { %>
-        <tr>
-          <td><%= item.sap_code %></td>
-          <td><%= item.description %></td>
-          <td><%= item.quantity %></td>
-        </tr>
-        <% }); %>
+        <% if (data && data.row) { %>
+          <% data.row.forEach(item=> { %>
+            <tr>
+              <td><%= item.sap_code %></td>
+              <td><%= item.description %></td>
+              <td><%= item.quantity %></td>
+            </tr>
+          <% }); %>
+        <% } %>
       </tbody>
-    </table>
+    </table>    
+    <a href="/download-pdf" target="_blank">Download PDF</a>
+
   </body>
 </html>
