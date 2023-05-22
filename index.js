@@ -5,7 +5,9 @@ const ejs = require('ejs');
 const fs = require('fs');
 const pdf = require('html-pdf');
 const path = require('path');
+const FTPClient = require('ftp');
 const PORT = 3000;
+
 
 const app = express();
 app.use(express.static('public'));
@@ -65,7 +67,7 @@ app.get('/download-pdf', (req, res) => {
         const options = {
           format: 'Letter',
           // Specify the path to the CSS file
-          "base": `file://${path.resolve('public/style.css')}`
+          base: `file://${path.resolve('public/style.css')}`
         };
 
         pdf.create(renderedHtml, options).toFile('output.pdf', (err, response) => {
@@ -93,6 +95,97 @@ app.get('/download-pdf', (req, res) => {
     });
   });
 });
+
+
+app.get('/upload-pdf', async (req, res) => {
+  // Read the XML file
+  fs.readFile('info_stocks.xml', 'utf-8', (err, xmlData) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Error reading XML file');
+    }
+
+    console.log('xmlData:', xmlData);
+
+    // Parse the XML data into a JavaScript object
+    xml2js.parseString(xmlData, async (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send('Error parsing XML data');
+      }
+
+      console.log('parsed XML data:', result);
+
+      // Render the EJS template with the data
+      const renderedHtml = await ejs.renderFile('views/index.ejs', { data: result.data });
+
+      try {
+        // Generate the PDF and save it to a file
+        const options = {
+          format: 'Letter',
+          base: `file://${path.resolve('public/style.css')}`
+        };
+
+        const response = await new Promise((resolve, reject) => {
+          pdf.create(renderedHtml, options).toFile('output.pdf', (err, res) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(res);
+            }
+          });
+        });
+
+        console.log('PDF created successfully:', response.filename);
+
+        // FTP upload configuration
+        const ftpHost = '94.46.13.62';
+        const ftpPort = 21;
+        const ftpUser = 'vicaima';
+        const ftpPassword = '8g6ZW.Tf4-vic';
+        //const remoteFilePath = '/path/to/destination/output.pdf';
+
+        // Create an FTP client instance
+        const ftpClient = new FTPClient();
+
+        ftpClient.on('ready', () => {
+          // Upload the PDF file
+          ftpClient.put('output.pdf', 'output.pdf', (err) => {
+            if (err) {
+              console.error('Error uploading PDF:', err);
+              ftpClient.end(); // Close the FTP connection
+              return res.status(500).send('Error uploading PDF');
+            }
+
+            console.log('PDF uploaded successfully');
+
+            // Remove the generated PDF file after it has been uploaded
+            fs.unlink('output.pdf', (err) => {
+              if (err) {
+                console.error('Error deleting PDF file:', err);
+              }
+            });
+
+            ftpClient.end(); // Close the FTP connection
+            res.send('PDF uploaded to FTP successfully');
+          });
+        });
+
+        ftpClient.on('error', (err) => {
+          console.error('Error connecting to FTP:', err);
+          return res.status(500).send('Error connecting to FTP');
+        });
+
+        // Connect to the FTP server
+        ftpClient.connect({ host: ftpHost, user: ftpUser, password: ftpPassword });
+      } catch (err) {
+        console.error('Error generating or uploading PDF:', err);
+        return res.status(500).send('Error generating or uploading PDF');
+      }
+    });
+  });
+});
+
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
