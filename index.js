@@ -8,7 +8,6 @@ const path = require('path');
 const FTPClient = require('ftp');
 const PORT = 3000;
 
-
 const app = express();
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
@@ -96,7 +95,6 @@ app.get('/download-pdf', (req, res) => {
   });
 });
 
-
 app.get('/upload-pdf', async (req, res) => {
   // Read the XML file
   fs.readFile('info_stocks.xml', 'utf-8', (err, xmlData) => {
@@ -125,6 +123,7 @@ app.get('/upload-pdf', async (req, res) => {
           format: 'Letter',
           base: `file://${path.resolve('public/style.css')}`
         };
+        
 
         const response = await new Promise((resolve, reject) => {
           pdf.create(renderedHtml, options).toFile('output.pdf', (err, res) => {
@@ -143,14 +142,14 @@ app.get('/upload-pdf', async (req, res) => {
         const ftpPort = 21;
         const ftpUser = 'vicaima';
         const ftpPassword = '8g6ZW.Tf4-vic';
-        //const remoteFilePath = '/path/to/destination/output.pdf';
+        const remoteFilePath = '/public_html/vicaimalibrary/files/files/files/output.pdf';
 
         // Create an FTP client instance
         const ftpClient = new FTPClient();
 
         ftpClient.on('ready', () => {
           // Upload the PDF file
-          ftpClient.put('output.pdf', 'output.pdf', (err) => {
+          ftpClient.put( 'output.pdf', remoteFilePath, (err) => {
             if (err) {
               console.error('Error uploading PDF:', err);
               ftpClient.end(); // Close the FTP connection
@@ -185,7 +184,6 @@ app.get('/upload-pdf', async (req, res) => {
     });
   });
 });
-
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
