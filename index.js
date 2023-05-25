@@ -67,7 +67,9 @@ app.get('/download-pdf', (req, res) => {
           format: 'Letter',
           // Specify the path to the CSS file
           base: `file://${path.resolve('public/style.css')}`
+          
         };
+        console.log(options);
 
         pdf.create(renderedHtml, options).toFile('output.pdf', (err, response) => {
           if (err) {
