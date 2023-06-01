@@ -6,6 +6,7 @@ const fs = require('fs');
 const pdf = require('html-pdf');
 const path = require('path');
 const FTPClient = require('ftp');
+require('dotenv').config();
 const PORT = 3000;
 
 const app = express();
@@ -65,10 +66,9 @@ app.get('/download-pdf', (req, res) => {
 
         const options = {
           format: 'Letter',
-          // Specify the path to the CSS file
-          base: `file://${path.resolve('public/style.css')}`
-          
-        };
+          base: `file:///${path.resolve('public/style.css').replace(/\\/g, '/').replace(' ', '%20')}`
+        };        
+
         console.log(options);
 
         pdf.create(renderedHtml, options).toFile('output.pdf', (err, response) => {
