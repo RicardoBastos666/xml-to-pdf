@@ -3,13 +3,14 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Table Example</title>
+  <title>Stock Off</title>
   <style>
     table {
       border-collapse: collapse;
       width: 100%;
       max-width: 800px;
       margin: 0 auto;
+      margin-top: 20px;
     }
 
     th,
@@ -49,6 +50,20 @@
       color: white;
       font-size: 18px;
     }
+
+    /* CSS for screen display */
+    @media screen {
+      .pdf-only {
+        display: none; /* Hide elements with the "pdf-only" class on screen */
+      }
+    }
+
+    /* CSS for printing */
+    @media print {
+      .screen-only {
+        display: none; /* Hide elements with the "screen-only" class when printing */
+      }
+    }
   </style>
 </head>
 
@@ -64,9 +79,9 @@
   <table>
     <thead>
       <tr>
-        <th>SAP Code</th>
-        <th>Description</th>
-        <th>Quantity</th>
+        <th>Codigo Material</th>
+        <th>Descrição</th>
+        <th>Quantidade</th>
       </tr>
     </thead>
     <tbody>
@@ -87,8 +102,12 @@
       <% } %>
     </tbody>
   </table>
-  <a href="/download-pdf" target="_blank">Download PDF</a>
-  <a href="/upload-pdf" target="_blank">Upload PDF to FTP</a>
+
+  <!-- Download link only visible on screen -->
+  <a href="/download-pdf" target="_blank" class="screen-only">Download PDF</a>
+
+  <!-- Upload link only visible on screen -->
+  <a href="/upload-pdf" target="_blank" class="screen-only">Upload PDF to FTP</a>
 </body>
 
 </html>
