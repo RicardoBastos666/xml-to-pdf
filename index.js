@@ -6,6 +6,9 @@ const fs = require('fs');
 const pdf = require('html-pdf');
 const path = require('path');
 const FTPClient = require('ftp');
+const cron = require('node-cron');
+const xmlLocation = "\\\\vicaim02\\download\\stock_off\\info_stocks.xml";
+
 require('dotenv').config();
 const PORT = 3000;
 
@@ -13,9 +16,21 @@ const app = express();
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
 
+//upload schedule
+cron.schedule('30 10 * * 1', () => {
+  // Perform the request to trigger the `/upload-pdf` route
+  axios.get('http://localhost:3000/upload-pdf')
+    .then(response => {
+      console.log('PDF upload triggered successfully');
+    })
+    .catch(error => {
+      console.error('Error triggering PDF upload:', error);
+    });
+});
+
 app.get('/', (req, res) => {
   // Read the XML file
-  fs.readFile('info_stocks.xml', 'utf-8', (err, xmlData) => {
+  fs.readFile(xmlLocation, 'utf-8', (err, xmlData) => {
     if (err) {
       console.error(err);
       return res.status(500).send('Error reading XML file');
@@ -40,7 +55,7 @@ app.get('/', (req, res) => {
 
 app.get('/download-pdf', (req, res) => {
   // Read the XML file
-  fs.readFile('info_stocks.xml', 'utf-8', (err, xmlData) => {
+  fs.readFile(xmlLocation, 'utf-8', (err, xmlData) => {
     if (err) {
       console.error(err);
       return res.status(500).send('Error reading XML file');
@@ -67,7 +82,7 @@ app.get('/download-pdf', (req, res) => {
         const options = {
           format: 'Letter',
           base: `file:///${path.resolve('public/style.css').replace(/\\/g, '/').replace(' ', '%20')}`
-        };        
+        };
 
         console.log(options);
 
@@ -99,7 +114,7 @@ app.get('/download-pdf', (req, res) => {
 
 app.get('/upload-pdf', async (req, res) => {
   // Read the XML file
-  fs.readFile('info_stocks.xml', 'utf-8', (err, xmlData) => {
+  fs.readFile(xmlLocation, 'utf-8', (err, xmlData) => {
     if (err) {
       console.error(err);
       return res.status(500).send('Error reading XML file');
@@ -123,9 +138,14 @@ app.get('/upload-pdf', async (req, res) => {
         // Generate the PDF and save it to a file
         const options = {
           format: 'Letter',
-          base: `file://${path.resolve('public/style.css')}`
+          base: `file://${path.resolve('public/style.css')}`,
+          footer: {
+            height: '20mm',
+            contents: {
+              default: `<div style="text-align: center; font-size: 10px;">Ultima actualização em ${new Date().toLocaleString()}</div>`
+            }
+          }
         };
-        
 
         const response = await new Promise((resolve, reject) => {
           pdf.create(renderedHtml, options).toFile('output.pdf', (err, res) => {
@@ -140,10 +160,10 @@ app.get('/upload-pdf', async (req, res) => {
         console.log('PDF created successfully:', response.filename);
 
         // FTP upload configuration
-        const ftpHost = '94.46.13.62';
-        const ftpPort = 21;
-        const ftpUser = 'vicaima';
-        const ftpPassword = '8g6ZW.Tf4-vic';
+        const ftpUser = process.env.FTP_USERNAME;
+        const ftpPassword = process.env.FTP_PASSWORD;
+        const ftpPort = process.env.FTP_PORT;
+        const ftpServer = process.env.FTP_SERVER;
         const remoteFilePath = '/public_html/vicaimalibrary/files/files/files/output.pdf';
 
         // Create an FTP client instance
@@ -151,7 +171,7 @@ app.get('/upload-pdf', async (req, res) => {
 
         ftpClient.on('ready', () => {
           // Upload the PDF file
-          ftpClient.put( 'output.pdf', remoteFilePath, (err) => {
+          ftpClient.put('output.pdf', remoteFilePath, (err) => {
             if (err) {
               console.error('Error uploading PDF:', err);
               ftpClient.end(); // Close the FTP connection
@@ -178,7 +198,7 @@ app.get('/upload-pdf', async (req, res) => {
         });
 
         // Connect to the FTP server
-        ftpClient.connect({ host: ftpHost, user: ftpUser, password: ftpPassword });
+        ftpClient.connect({ host: ftpServer, user: ftpUser, password: ftpPassword });
       } catch (err) {
         console.error('Error generating or uploading PDF:', err);
         return res.status(500).send('Error generating or uploading PDF');
@@ -186,6 +206,7 @@ app.get('/upload-pdf', async (req, res) => {
     });
   });
 });
+
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
