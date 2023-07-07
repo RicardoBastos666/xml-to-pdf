@@ -42,7 +42,7 @@ app.get('/', (req, res) => {
     { name: 'DecordorHD', path: '/decordorHD' },
     { name: 'DecordorSD', path: '/decordorSD' },
     { name: 'Naturdor', path: '/naturdor' },
-    { name: 'Embossedcollection', path: '/embossedcollection' }
+    { name: 'EmbossedCollection', path: '/embossedcollection' }
   ];
 
   res.render('index', { routes });
@@ -266,11 +266,6 @@ app.get('/download-pdf', async (req, res) => {
   }
 });
 
-
-
-
-
-
 /*app.get('/download-pdf', (req, res) => {
   // Read the XML file
   fs.readFile(xmlLocation, 'utf-8', (err, xmlData) => {
@@ -330,6 +325,110 @@ app.get('/download-pdf', async (req, res) => {
   });
 });*/
 
+app.get('/upload-pdf', async (req, res) => {
+  const views = [
+    { name: 'Decordor3D', xmlLocation: decordor3DXml },
+    { name: 'DecordorHD', xmlLocation: decordorHDXml },
+    { name: 'DecordorSD', xmlLocation: decordorSDXml },
+    { name: 'DecordorSHD', xmlLocation: decordorSHDXml },
+    { name: 'EmbossedCollection', xmlLocation: embossedCollectionXml },
+    { name: 'Naturdor', xmlLocation: naturdorXml },
+    // Add more views as needed
+  ];
+
+  try {
+    for (let i = 0; i < views.length; i++) {
+      const { name, xmlLocation } = views[i];
+
+      // Read the XML file
+      const xmlData = await fs.promises.readFile(xmlLocation, 'utf-8');
+
+      // Parse the XML data into a JavaScript object
+      const result = await xml2js.parseStringPromise(xmlData);
+
+      // Render the EJS template with the data
+      const renderedHtml = await ejs.renderFile(`views/${name}.ejs`, { data: result.data, routeName: name });
+
+      // Generate the PDF and save it to a file
+      const options = {
+        format: 'Letter',
+        base: `file://${path.resolve('public/style.css')}`,
+        footer: {
+          height: '20mm',
+          contents: {
+            default: `<div style="text-align: center; font-size: 10px;">Ultima actualização em ${new Date().toLocaleString()}</div>`
+          }
+        }
+      };
+
+      //const pdfPath = path.resolve('output.pdf');
+      const pdfPath = path.resolve('public', 'pdf', `stockoff_${name}.pdf`);
+
+      await new Promise((resolve, reject) => {
+        pdf.create(renderedHtml, options).toFile(pdfPath, (err, response) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(response);
+          }
+        });
+      });
+
+      // FTP upload configuration
+      const ftpUser = process.env.FTP_USERNAME;
+      const ftpPassword = process.env.FTP_PASSWORD;
+      const ftpPort = process.env.FTP_PORT;
+      const ftpServer = process.env.FTP_SERVER;
+      const remoteFilePath = `/public_html/vicaimalibrary/files/files/files/stockoff_${name}.pdf`;
+
+      // Create an FTP client instance
+      const ftpClient = new FTPClient();
+
+      ftpClient.on('ready', () => {
+        // Upload the PDF file
+        ftpClient.put(pdfPath, remoteFilePath, (err) => {
+          if (err) {
+            console.error('Error uploading PDF:', err);
+            ftpClient.end(); // Close the FTP connection
+            return res.status(500).send('Error uploading PDF');
+          }
+
+          console.log(`PDF ${name} uploaded successfully`);
+
+          // Remove the generated PDF file after it has been uploaded
+          fs.unlink(pdfPath, (err) => {
+            if (err) {
+              console.error('Error deleting PDF file:', err);
+            }
+          });
+
+          if (i === views.length - 1) {
+            ftpClient.end(); // Close the FTP connection
+            return res.send('PDFs uploaded to FTP successfully');
+          }
+        });
+      });
+
+      ftpClient.on('error', (err) => {
+        console.error('Error connecting to FTP:', err);
+        return res.status(500).send('Error connecting to FTP');
+      });
+
+      // Connect to the FTP server
+      ftpClient.connect({ host: ftpServer, user: ftpUser, password: ftpPassword });
+    }
+
+    // If the loop completes without any errors, the PDFs will be uploaded
+    // and the response will be sent outside the loop.
+
+  } catch (err) {
+    console.error('Error generating or uploading PDF:', err);
+    return res.status(500).send('Error generating or uploading PDF');
+  }
+});
+
+
+/*
 app.get('/upload-pdf', async (req, res) => {
   // Read the XML file
   fs.readFile(xmlLocation, 'utf-8', (err, xmlData) => {
@@ -423,7 +522,7 @@ app.get('/upload-pdf', async (req, res) => {
       }
     });
   });
-});
+});*/
 
 
 app.listen(PORT, () => {
