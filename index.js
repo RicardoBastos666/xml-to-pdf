@@ -9,12 +9,15 @@ const FTPClient = require('ftp');
 const cron = require('node-cron');
 //const xmlLocation = "\\\\vicaim02\\download\\stock_off\\info_stocks.xml";
 //const xmlLocation = ".\\info_stocks_decordorshd.xml";
-const decordorSHDXml = ".\\stockoff_decordorSHD.xml"
-const decordor3DXml = ".\\stockoff_decordor3D.xml"
-const decordorHDXml = ".\\stockoff_decordorHD.xml"
-const decordorSDXml = ".\\stockoff_decordorSD.xml"
-const naturdorXml = ".\\stockoff_naturdor.xml"
-const embossedCollectionXml = ".\\stockoff_embossedcollection.xml"
+const decordorSHDXml = "\\\\vicaim02\\Download\\stock_off\\stockoff_decordorSHD.xml"
+const decordor3DXml = "\\\\vicaim02\\Download\\stock_off\\stockoff_decordor3D.xml"
+const decordorHDXml = "\\\\vicaim02\\Download\\stock_off\\stockoff_decordorHD.xml"
+const decordorSDXml = "\\\\vicaim02\\Download\\stock_off\\stockoff_decordorSD.xml"
+const naturdorXml = "\\\\vicaim02\\Download\\stock_off\\stockoff_naturdor.xml"
+const embossedCollectionXml = "\\\\vicaim02\\Download\\stock_off\\stockoff_embossedcollection.xml"
+const axios = require('axios');
+
+
 
 require('dotenv').config();
 const PORT = 3000;
@@ -24,10 +27,10 @@ app.use(express.static('public'));
 app.set('view engine', 'ejs');
 
 //upload schedule
-cron.schedule('30 10 * * 1', () => {
+cron.schedule('03 16 * * 5', () => {
   // Perform the request to trigger the `/upload-pdf` route
   axios.get('http://localhost:3000/upload-pdf')
-    .then(response => {
+    .then(_response => {
       console.log('PDF upload triggered successfully');
     })
     .catch(error => {
@@ -47,30 +50,6 @@ app.get('/', (req, res) => {
 
   res.render('index', { routes });
 });
-/*app.get('/', (req, res) => {
-  // Read the XML file
-  fs.readFile(xmlLocation, 'utf-8', (err, xmlData) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).send('Error reading XML file');
-    }
-
-    console.log('xmlData:', xmlData);
-
-    // Parse the XML data into a JavaScript object
-    xml2js.parseString(xmlData, (err, result) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).send('Error parsing XML data');
-      }
-
-      console.log('parsed XML data:', result);
-
-      // Render the EJS template with the data
-      res.render('index', { data: result.data });
-    });
-  });
-});*/
 
 app.get('/decordorSHD', (req, res) => {
   // Read the XML file
@@ -92,7 +71,7 @@ app.get('/decordorSHD', (req, res) => {
       console.log('parsed XML data:', result);
 
       // Render the EJS template with the data
-      res.render('decordorSHD', { data: result.data });
+      res.render('decordorSHD', { data: result.data, routeName: 'DecordorSHD' });
     });
   });
 });
@@ -113,7 +92,7 @@ app.get('/decordor3D', (req, res) => {
       }
 
       // Render the DecordorSD EJS template with the data
-      res.render('decordor3D', { data: result.data });
+      res.render('decordor3D', { data: result.data, routeName:'Decordor3D' });
     });
   });
 });
@@ -134,7 +113,7 @@ app.get('/decordorHD', (req, res) => {
       }
 
       // Render the DecordorSD EJS template with the data
-      res.render('decordorHD', { data: result.data });
+      res.render('decordorHD', { data: result.data, routeName:'DecordorHD' });
     });
   });
 });
@@ -155,7 +134,7 @@ app.get('/decordorSD', (req, res) => {
       }
 
       // Render the DecordorSD EJS template with the data
-      res.render('decordorSD', { data: result.data });
+      res.render('decordorSD', { data: result.data, routeName:'DecordorSD' });
     });
   });
 });
@@ -176,7 +155,7 @@ app.get('/naturdor', (req, res) => {
       }
 
       // Render the DecordorSD EJS template with the data
-      res.render('naturdor', { data: result.data });
+      res.render('naturdor', { data: result.data, routeName:'Naturdor' });
     });
   });
 });
@@ -197,12 +176,12 @@ app.get('/embossedcollection', (req, res) => {
       }
 
       // Render the DecordorSD EJS template with the data
-      res.render('embossedcollection', { data: result.data });
+      res.render('embossedcollection', { data: result.data, routeName:'EmbossedCollection' });
     });
   });
 });
 
-app.get('/download-pdf', async (req, res) => {
+/*app.get('/download-pdf', async (req, res) => {
   const views = [
     { name: 'decordor3D', xmlLocation: decordor3DXml },
     { name: 'decordorHD', xmlLocation: decordorHDXml },
@@ -265,65 +244,7 @@ app.get('/download-pdf', async (req, res) => {
     return res.status(500).send('Error generating PDFs');
   }
 });
-
-/*app.get('/download-pdf', (req, res) => {
-  // Read the XML file
-  fs.readFile(xmlLocation, 'utf-8', (err, xmlData) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).send('Error reading XML file');
-    }
-
-    console.log('xmlData:', xmlData);
-
-    // Parse the XML data into a JavaScript object
-    xml2js.parseString(xmlData, (err, result) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).send('Error parsing XML data');
-      }
-
-      console.log('parsed XML data:', result);
-
-      // Render the EJS template with the data
-      ejs.renderFile('views/index.ejs', { data: result.data }, (err, renderedHtml) => {
-        if (err) {
-          console.error('Error rendering HTML:', err);
-          return res.status(500).send('Error rendering HTML');
-        }
-
-        const options = {
-          format: 'Letter',
-          base: `file:///${path.resolve('public/style.css').replace(/\\/g, '/').replace(' ', '%20')}`
-        };
-
-        console.log(options);
-
-        pdf.create(renderedHtml, options).toFile('output.pdf', (err, response) => {
-          if (err) {
-            console.error('Error generating PDF:', err);
-            return res.status(500).send('Error generating PDF');
-          }
-
-          console.log('PDF created successfully:', response.filename);
-          res.download(response.filename, 'output.pdf', (err) => {
-            if (err) {
-              console.error('Error downloading PDF:', err);
-              return res.status(500).send('Error downloading PDF');
-            }
-
-            // Remove the generated PDF file after it has been downloaded
-            fs.unlink(response.filename, (err) => {
-              if (err) {
-                console.error('Error deleting PDF file:', err);
-              }
-            });
-          });
-        });
-      });
-    });
-  });
-});*/
+*/
 
 app.get('/upload-pdf', async (req, res) => {
   const views = [
@@ -426,104 +347,6 @@ app.get('/upload-pdf', async (req, res) => {
     return res.status(500).send('Error generating or uploading PDF');
   }
 });
-
-
-/*
-app.get('/upload-pdf', async (req, res) => {
-  // Read the XML file
-  fs.readFile(xmlLocation, 'utf-8', (err, xmlData) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).send('Error reading XML file');
-    }
-
-    console.log('xmlData:', xmlData);
-
-    // Parse the XML data into a JavaScript object
-    xml2js.parseString(xmlData, async (err, result) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).send('Error parsing XML data');
-      }
-
-      console.log('parsed XML data:', result);
-
-      // Render the EJS template with the data
-      const renderedHtml = await ejs.renderFile('views/index.ejs', { data: result.data });
-
-      try {
-        // Generate the PDF and save it to a file
-        const options = {
-          format: 'Letter',
-          base: `file://${path.resolve('public/style.css')}`,
-          footer: {
-            height: '20mm',
-            contents: {
-              default: `<div style="text-align: center; font-size: 10px;">Ultima actualização em ${new Date().toLocaleString()}</div>`
-            }
-          }
-        };
-
-        const response = await new Promise((resolve, reject) => {
-          pdf.create(renderedHtml, options).toFile('output.pdf', (err, res) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(res);
-            }
-          });
-        });
-
-        console.log('PDF created successfully:', response.filename);
-
-        // FTP upload configuration
-        const ftpUser = process.env.FTP_USERNAME;
-        const ftpPassword = process.env.FTP_PASSWORD;
-        const ftpPort = process.env.FTP_PORT;
-        const ftpServer = process.env.FTP_SERVER;
-        const remoteFilePath = '/public_html/vicaimalibrary/files/files/files/output.pdf';
-
-        // Create an FTP client instance
-        const ftpClient = new FTPClient();
-
-        ftpClient.on('ready', () => {
-          // Upload the PDF file
-          ftpClient.put('output.pdf', remoteFilePath, (err) => {
-            if (err) {
-              console.error('Error uploading PDF:', err);
-              ftpClient.end(); // Close the FTP connection
-              return res.status(500).send('Error uploading PDF');
-            }
-
-            console.log('PDF uploaded successfully');
-
-            // Remove the generated PDF file after it has been uploaded
-            fs.unlink('output.pdf', (err) => {
-              if (err) {
-                console.error('Error deleting PDF file:', err);
-              }
-            });
-
-            ftpClient.end(); // Close the FTP connection
-            res.send('PDF uploaded to FTP successfully');
-          });
-        });
-
-        ftpClient.on('error', (err) => {
-          console.error('Error connecting to FTP:', err);
-          return res.status(500).send('Error connecting to FTP');
-        });
-
-        // Connect to the FTP server
-        ftpClient.connect({ host: ftpServer, user: ftpUser, password: ftpPassword });
-      } catch (err) {
-        console.error('Error generating or uploading PDF:', err);
-        return res.status(500).send('Error generating or uploading PDF');
-      }
-    });
-  });
-});*/
-
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
