@@ -7,6 +7,7 @@ const pdf = require('html-pdf');
 const path = require('path');
 const FTPClient = require('ftp');
 const cron = require('node-cron');
+
 //const xmlLocation = "\\\\vicaim02\\download\\stock_off\\info_stocks.xml";
 //const xmlLocation = ".\\info_stocks_decordorshd.xml";
 const decordorSHDXml = "\\\\vicaim02\\Download\\stock_off\\stockoff_decordorSHD.xml"
@@ -15,8 +16,6 @@ const decordorHDXml = "\\\\vicaim02\\Download\\stock_off\\stockoff_decordorHD.xm
 const decordorSDXml = "\\\\vicaim02\\Download\\stock_off\\stockoff_decordorSD.xml"
 const naturdorXml = "\\\\vicaim02\\Download\\stock_off\\stockoff_naturdor.xml"
 const embossedCollectionXml = "\\\\vicaim02\\Download\\stock_off\\stockoff_embossedcollection.xml"
-const axios = require('axios');
-
 
 
 require('dotenv').config();
@@ -27,7 +26,7 @@ app.use(express.static('public'));
 app.set('view engine', 'ejs');
 
 //upload schedule
-cron.schedule('03 16 * * 5', () => {
+cron.schedule('24 16 * * 1', () => {
   // Perform the request to trigger the `/upload-pdf` route
   axios.get('http://localhost:3000/upload-pdf')
     .then(_response => {
@@ -264,8 +263,26 @@ app.get('/upload-pdf', async (req, res) => {
       // Read the XML file
       const xmlData = await fs.promises.readFile(xmlLocation, 'utf-8');
 
+      // Check if the XML data is empty
+      if (!xmlData) {
+        console.error(`XML file is empty: ${xmlLocation}`);
+        continue; // Skip this iteration and proceed to the next XML file
+      }
+
       // Parse the XML data into a JavaScript object
-      const result = await xml2js.parseStringPromise(xmlData);
+      let result;
+      try {
+        result = await xml2js.parseStringPromise(xmlData);
+      } catch (parseError) {
+        console.error(`Error parsing XML data: ${xmlLocation}`, parseError);
+        continue; // Skip this iteration and proceed to the next XML file
+      }
+
+      // Check if the parsed result is empty
+      if (!result) {
+        console.error(`Error parsing XML data: ${xmlLocation}`);
+        continue; // Skip this iteration and proceed to the next XML file
+      }
 
       // Render the EJS template with the data
       const renderedHtml = await ejs.renderFile(`views/${name}.ejs`, { data: result.data, routeName: name });
@@ -277,12 +294,11 @@ app.get('/upload-pdf', async (req, res) => {
         footer: {
           height: '20mm',
           contents: {
-            default: `<div style="text-align: center; font-size: 10px;">Ultima actualização em ${new Date().toLocaleString()}</div>`
+            default: `<div style="text-align: center; font-size: 10px;">Ultima atualização em ${new Date().toLocaleString()}</div>`
           }
         }
       };
 
-      //const pdfPath = path.resolve('output.pdf');
       const pdfPath = path.resolve('public', 'pdf', `stockoff_${name}.pdf`);
 
       await new Promise((resolve, reject) => {
@@ -311,7 +327,7 @@ app.get('/upload-pdf', async (req, res) => {
           if (err) {
             console.error('Error uploading PDF:', err);
             ftpClient.end(); // Close the FTP connection
-            return res.status(500).send('Error uploading PDF');
+            return;
           }
 
           console.log(`PDF ${name} uploaded successfully`);
@@ -325,14 +341,17 @@ app.get('/upload-pdf', async (req, res) => {
 
           if (i === views.length - 1) {
             ftpClient.end(); // Close the FTP connection
-            return res.send('PDFs uploaded to FTP successfully');
+            return res.send('PDFs generated and uploaded successfully');
           }
         });
       });
 
       ftpClient.on('error', (err) => {
         console.error('Error connecting to FTP:', err);
-        return res.status(500).send('Error connecting to FTP');
+        if (i === views.length - 1) {
+          ftpClient.end(); // Close the FTP connection
+          return res.status(500).send('Error connecting to FTP');
+        }
       });
 
       // Connect to the FTP server
@@ -341,7 +360,7 @@ app.get('/upload-pdf', async (req, res) => {
 
     // If the loop completes without any errors, the PDFs will be uploaded
     // and the response will be sent outside the loop.
-
+    return res.status(200).send('PDFs generated and uploaded successfully');
   } catch (err) {
     console.error('Error generating or uploading PDF:', err);
     return res.status(500).send('Error generating or uploading PDF');
