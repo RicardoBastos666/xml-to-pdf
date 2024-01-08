@@ -1,13 +1,17 @@
+/** 
+ * (c) 2023 Ricardo Bastos All Rights Reserverd
+ **/
+
 const express = require('express');
 const xml2js = require('xml2js');
-const PDFDocument = require('pdfkit');
+//const PDFDocument = require('pdfkit');
 const ejs = require('ejs');
 const fs = require('fs');
 const pdf = require('html-pdf');
 const path = require('path');
 const FTPClient = require('ftp');
 const cron = require('node-cron');
-
+const axios = require('axios');
 //const xmlLocation = "\\\\vicaim02\\download\\stock_off\\info_stocks.xml";
 //const xmlLocation = ".\\info_stocks_decordorshd.xml";
 const decordorSHDXml = "\\\\vicaim02\\Download\\stock_off\\stockoff_decordorSHD.xml"
@@ -26,7 +30,7 @@ app.use(express.static('public'));
 app.set('view engine', 'ejs');
 
 //upload schedule
-cron.schedule('24 16 * * 1', () => {
+cron.schedule('15 9 * * 5', () => {
   // Perform the request to trigger the `/upload-pdf` route
   axios.get('http://localhost:3000/upload-pdf')
     .then(_response => {
@@ -257,6 +261,9 @@ app.get('/upload-pdf', async (req, res) => {
   ];
 
   try {
+    // Flag to keep track of whether an error occurred
+    let errorOccurred = false;
+
     for (let i = 0; i < views.length; i++) {
       const { name, xmlLocation } = views[i];
 
@@ -275,12 +282,14 @@ app.get('/upload-pdf', async (req, res) => {
         result = await xml2js.parseStringPromise(xmlData);
       } catch (parseError) {
         console.error(`Error parsing XML data: ${xmlLocation}`, parseError);
+        errorOccurred = true; // Set the error flag
         continue; // Skip this iteration and proceed to the next XML file
       }
 
       // Check if the parsed result is empty
       if (!result) {
         console.error(`Error parsing XML data: ${xmlLocation}`);
+        errorOccurred = true; // Set the error flag
         continue; // Skip this iteration and proceed to the next XML file
       }
 
@@ -327,6 +336,7 @@ app.get('/upload-pdf', async (req, res) => {
           if (err) {
             console.error('Error uploading PDF:', err);
             ftpClient.end(); // Close the FTP connection
+            errorOccurred = true; // Set the error flag
             return;
           }
 
@@ -341,16 +351,16 @@ app.get('/upload-pdf', async (req, res) => {
 
           if (i === views.length - 1) {
             ftpClient.end(); // Close the FTP connection
-            return res.send('PDFs generated and uploaded successfully');
           }
         });
       });
 
       ftpClient.on('error', (err) => {
         console.error('Error connecting to FTP:', err);
+        errorOccurred = true; // Set the error flag
+
         if (i === views.length - 1) {
           ftpClient.end(); // Close the FTP connection
-          return res.status(500).send('Error connecting to FTP');
         }
       });
 
@@ -358,12 +368,18 @@ app.get('/upload-pdf', async (req, res) => {
       ftpClient.connect({ host: ftpServer, user: ftpUser, password: ftpPassword });
     }
 
-    // If the loop completes without any errors, the PDFs will be uploaded
-    // and the response will be sent outside the loop.
-    return res.status(200).send('PDFs generated and uploaded successfully');
+    // Check if an error occurred during the loop
+    if (!errorOccurred) {
+      // If no errors occurred, send a success response
+      res.status(200).send('PDFs generated and uploaded successfully');
+    } else {
+      // If an error occurred, send an error response
+      res.status(500).send('Error generating or uploading PDF');
+    }
   } catch (err) {
     console.error('Error generating or uploading PDF:', err);
-    return res.status(500).send('Error generating or uploading PDF');
+    // Send an error response if an unhandled error occurs
+    res.status(500).send('Error generating or uploading PDF');
   }
 });
 
