@@ -20,7 +20,9 @@ const decordorHDXml = "\\\\vicaim02\\Download\\stock_off\\stockoff_decordorHD.xm
 const decordorSDXml = "\\\\vicaim02\\Download\\stock_off\\stockoff_decordorSD.xml"
 const naturdorXml = "\\\\vicaim02\\Download\\stock_off\\stockoff_naturdor.xml"
 const embossedCollectionXml = "\\\\vicaim02\\Download\\stock_off\\stockoff_embossedcollection.xml"
-
+const orlaFoilOutrosXml = "\\\\vicaim02\\Download\\stock_off\\STOCKOFF_FOILOUTROS.XML"
+const orlaPvcAbsXml = "\\\\vicaim02\\Download\\stock_off\\STOCKOFF_PVCABS.XML"
+const orla3dXml = "\\\\vicaim02\\Download\\stock_off\\STOCKOFF_3D.XML"
 
 require('dotenv').config();
 const PORT = 3000;
@@ -48,11 +50,93 @@ app.get('/', (req, res) => {
     { name: 'DecordorHD', path: '/decordorHD' },
     { name: 'DecordorSD', path: '/decordorSD' },
     { name: 'Naturdor', path: '/naturdor' },
-    { name: 'EmbossedCollection', path: '/embossedcollection' }
+    { name: 'EmbossedCollection', path: '/embossedcollection' },
+    { name: 'OrlaFoilOutros', path: '/orlafoiloutros'},
+    { name: 'OrlaPvcAbs', path: '/orlapvcabs'},
+    { name: 'Orla3D', path: '/orla3d'}
   ];
 
   res.render('index', { routes });
 });
+
+//WIP
+
+app.get('/orlafoiloutros', (req, res) => {
+  // Read the XML file
+  fs.readFile(orlaFoilOutrosXml, 'utf-8', (err, xmlData) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Error reading XML file');
+    }
+
+    console.log('xmlData:', xmlData);
+
+    // Parse the XML data into a JavaScript object
+    xml2js.parseString(xmlData, (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send('Error parsing XML data');
+      }
+
+      console.log('parsed XML data:', result);
+
+      // Render the EJS template with the data
+      res.render('orlaFoilOutros', { data: result.data, routeName: 'OrlaFoilOutros' });
+    });
+  });
+});
+
+app.get('/orlapvcabs', (req, res) => {
+  // Read the XML file
+  fs.readFile(orlaPvcAbsXml, 'utf-8', (err, xmlData) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Error reading XML file');
+    }
+
+    console.log('xmlData:', xmlData);
+
+    // Parse the XML data into a JavaScript object
+    xml2js.parseString(xmlData, (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send('Error parsing XML data');
+      }
+
+      console.log('parsed XML data:', result);
+
+      // Render the EJS template with the data
+      res.render('orlaPvcAbs', { data: result.data, routeName: 'OrlaPvcAbs' });
+    });
+  });
+});
+
+app.get('/orla3d', (req, res) => {
+  // Read the XML file
+  fs.readFile(orla3dXml, 'utf-8', (err, xmlData) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Error reading XML file');
+    }
+
+    console.log('xmlData:', xmlData);
+
+    // Parse the XML data into a JavaScript object
+    xml2js.parseString(xmlData, (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send('Error parsing XML data');
+      }
+
+      console.log('parsed XML data:', result);
+
+      // Render the EJS template with the data
+      res.render('orla3D', { data: result.data, routeName: 'Orla3D' });
+    });
+  });
+});
+
+//END WIP
 
 app.get('/decordorSHD', (req, res) => {
   // Read the XML file
@@ -184,14 +268,17 @@ app.get('/embossedcollection', (req, res) => {
   });
 });
 
-/*app.get('/download-pdf', async (req, res) => {
+app.get('/download-pdf', async (req, res) => {
   const views = [
-    { name: 'decordor3D', xmlLocation: decordor3DXml },
-    { name: 'decordorHD', xmlLocation: decordorHDXml },
-    { name: 'decordorSD', xmlLocation: decordorSDXml },
-    { name: 'decordorSHD', xmlLocation: decordorSHDXml },
-    { name: 'embossedcollection', xmlLocation: embossedCollectionXml },
-    { name: 'naturdor', xmlLocation: naturdorXml },
+    { name: 'Decordor3D', xmlLocation: decordor3DXml },
+    { name: 'DecordorHD', xmlLocation: decordorHDXml },
+    { name: 'DecordorSD', xmlLocation: decordorSDXml },
+    { name: 'DecordorSHD', xmlLocation: decordorSHDXml },
+    { name: 'EmbossedCollection', xmlLocation: embossedCollectionXml },
+    { name: 'Naturdor', xmlLocation: naturdorXml },
+    { name: 'OrlaFoilOutros', xmlLocation: orlaFoilOutrosXml},
+    { name: 'OrlaPvcAbs', xmlLocation: orlaPvcAbsXml},
+    { name: 'Orla3D', xmlLocation: orla3dXml},
     // Add more views as needed
   ];
 
@@ -247,7 +334,7 @@ app.get('/embossedcollection', (req, res) => {
     return res.status(500).send('Error generating PDFs');
   }
 });
-*/
+
 
 app.get('/upload-pdf', async (req, res) => {
   const views = [
@@ -257,6 +344,9 @@ app.get('/upload-pdf', async (req, res) => {
     { name: 'DecordorSHD', xmlLocation: decordorSHDXml },
     { name: 'EmbossedCollection', xmlLocation: embossedCollectionXml },
     { name: 'Naturdor', xmlLocation: naturdorXml },
+    { name: 'orlaFoilOutros', xmlLocation: orlaFoilOutrosXml},
+    { name: 'orlaPvcAbs', xmlLocation: orlaPvcAbsXml},
+    { name: 'orla3D', xmlLocation: orla3dXml},
     // Add more views as needed
   ];
 
