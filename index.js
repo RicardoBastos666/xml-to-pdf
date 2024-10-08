@@ -1,7 +1,7 @@
 /** 
  * (c) 2023 Ricardo Bastos All Rights Reserverd
  **/
-
+const myPath = "/mnt/vicaim02/stock_off/"
 const express = require('express');
 const xml2js = require('xml2js');
 //const PDFDocument = require('pdfkit');
@@ -14,25 +14,26 @@ const cron = require('node-cron');
 const axios = require('axios');
 //const xmlLocation = "\\\\vicaim02\\download\\stock_off\\info_stocks.xml";
 //const xmlLocation = ".\\info_stocks_decordorshd.xml";
-const decordorSHDXml = "\\\\vicaim02\\Download\\stock_off\\stockoff_decordorSHD.xml"
-const decordor3DXml = "\\\\vicaim02\\Download\\stock_off\\stockoff_decordor3D.xml"
-const decordorHDXml = "\\\\vicaim02\\Download\\stock_off\\stockoff_decordorHD.xml"
-const decordorSDXml = "\\\\vicaim02\\Download\\stock_off\\stockoff_decordorSD.xml"
-const naturdorXml = "\\\\vicaim02\\Download\\stock_off\\stockoff_naturdor.xml"
-const embossedCollectionXml = "\\\\vicaim02\\Download\\stock_off\\stockoff_embossedcollection.xml"
-const orlaFoilOutrosXml = "\\\\vicaim02\\Download\\stock_off\\STOCKOFF_FOILOUTROS.XML"
-const orlaPvcAbsXml = "\\\\vicaim02\\Download\\stock_off\\STOCKOFF_PVCABS.XML"
-const orla3dXml = "\\\\vicaim02\\Download\\stock_off\\STOCKOFF_3D.XML"
+const decordorSHDXml = myPath + "stockoff_decordorSHD.xml";
+const decordor3DXml = myPath + "stockoff_decordor3D.xml";
+const decordorHDXml = myPath + "stockoff_decordorHD.xml";
+const decordorSDXml = myPath + "stockoff_decordorSD.xml";
+const naturdorXml = myPath + "stockoff_naturdor.xml";
+const embossedCollectionXml = myPath + "stockoff_embossedcollection.xml";
+const orlaFoilOutrosXml = myPath + "STOCKOFF_FOILOUTROS.XML";
+const orlaPvcAbsXml = myPath + "STOCKOFF_PVCABS.XML";
+const orla3dXml = myPath + "STOCKOFF_3D.XML";
 
 require('dotenv').config();
 const PORT = 3000;
 
 const app = express();
-app.use(express.static('public'));
+//app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 
 //upload schedule
-cron.schedule('15 9 * * 5', () => {
+cron.schedule('00 11 * * *', () => {
   // Perform the request to trigger the `/upload-pdf` route
   axios.get('http://localhost:3000/upload-pdf')
     .then(_response => {
@@ -51,9 +52,9 @@ app.get('/', (req, res) => {
     { name: 'DecordorSD', path: '/decordorSD' },
     { name: 'Naturdor', path: '/naturdor' },
     { name: 'EmbossedCollection', path: '/embossedcollection' },
-    { name: 'OrlaFoilOutros', path: '/orlafoiloutros'},
-    { name: 'OrlaPvcAbs', path: '/orlapvcabs'},
-    { name: 'Orla3D', path: '/orla3d'}
+    { name: 'OrlaFoilOutros', path: '/orlafoiloutros' },
+    { name: 'OrlaPvcAbs', path: '/orlapvcabs' },
+    { name: 'Orla3D', path: '/orla3d' }
   ];
 
   res.render('index', { routes });
@@ -179,7 +180,7 @@ app.get('/decordor3D', (req, res) => {
       }
 
       // Render the DecordorSD EJS template with the data
-      res.render('decordor3D', { data: result.data, routeName:'Decordor3D' });
+      res.render('decordor3D', { data: result.data, routeName: 'Decordor3D' });
     });
   });
 });
@@ -200,7 +201,7 @@ app.get('/decordorHD', (req, res) => {
       }
 
       // Render the DecordorSD EJS template with the data
-      res.render('decordorHD', { data: result.data, routeName:'DecordorHD' });
+      res.render('decordorHD', { data: result.data, routeName: 'DecordorHD' });
     });
   });
 });
@@ -221,7 +222,7 @@ app.get('/decordorSD', (req, res) => {
       }
 
       // Render the DecordorSD EJS template with the data
-      res.render('decordorSD', { data: result.data, routeName:'DecordorSD' });
+      res.render('decordorSD', { data: result.data, routeName: 'DecordorSD' });
     });
   });
 });
@@ -242,7 +243,7 @@ app.get('/naturdor', (req, res) => {
       }
 
       // Render the DecordorSD EJS template with the data
-      res.render('naturdor', { data: result.data, routeName:'Naturdor' });
+      res.render('naturdor', { data: result.data, routeName: 'Naturdor' });
     });
   });
 });
@@ -263,7 +264,7 @@ app.get('/embossedcollection', (req, res) => {
       }
 
       // Render the DecordorSD EJS template with the data
-      res.render('embossedcollection', { data: result.data, routeName:'EmbossedCollection' });
+      res.render('embossedcollection', { data: result.data, routeName: 'EmbossedCollection' });
     });
   });
 });
@@ -276,9 +277,9 @@ app.get('/download-pdf', async (req, res) => {
     { name: 'DecordorSHD', xmlLocation: decordorSHDXml },
     { name: 'EmbossedCollection', xmlLocation: embossedCollectionXml },
     { name: 'Naturdor', xmlLocation: naturdorXml },
-    { name: 'OrlaFoilOutros', xmlLocation: orlaFoilOutrosXml},
-    { name: 'OrlaPvcAbs', xmlLocation: orlaPvcAbsXml},
-    { name: 'Orla3D', xmlLocation: orla3dXml},
+    { name: 'OrlaFoilOutros', xmlLocation: orlaFoilOutrosXml },
+    { name: 'OrlaPvcAbs', xmlLocation: orlaPvcAbsXml },
+    { name: 'Orla3D', xmlLocation: orla3dXml },
     // Add more views as needed
   ];
 
@@ -338,15 +339,15 @@ app.get('/download-pdf', async (req, res) => {
 
 app.get('/upload-pdf', async (req, res) => {
   const views = [
-    { name: 'Decordor3D', xmlLocation: decordor3DXml },
-    { name: 'DecordorHD', xmlLocation: decordorHDXml },
-    { name: 'DecordorSD', xmlLocation: decordorSDXml },
-    { name: 'DecordorSHD', xmlLocation: decordorSHDXml },
-    { name: 'EmbossedCollection', xmlLocation: embossedCollectionXml },
-    { name: 'Naturdor', xmlLocation: naturdorXml },
-    { name: 'orlaFoilOutros', xmlLocation: orlaFoilOutrosXml},
-    { name: 'orlaPvcAbs', xmlLocation: orlaPvcAbsXml},
-    { name: 'orla3D', xmlLocation: orla3dXml},
+    { name: 'decordor3D', xmlLocation: decordor3DXml },
+    { name: 'decordorHD', xmlLocation: decordorHDXml },
+    { name: 'decordorSD', xmlLocation: decordorSDXml },
+    { name: 'decordorSHD', xmlLocation: decordorSHDXml },
+    { name: 'embossedcollection', xmlLocation: embossedCollectionXml },
+    { name: 'naturdor', xmlLocation: naturdorXml },
+    { name: 'orlaFoilOutros', xmlLocation: orlaFoilOutrosXml },
+    { name: 'orlaPvcAbs', xmlLocation: orlaPvcAbsXml },
+    { name: 'orla3D', xmlLocation: orla3dXml },
     // Add more views as needed
   ];
 
@@ -388,14 +389,25 @@ app.get('/upload-pdf', async (req, res) => {
 
       // Generate the PDF and save it to a file
       const options = {
-        format: 'Letter',
-        base: `file://${path.resolve('public/style.css')}`,
+        childProcessOptions: {
+          env: {
+            OPENSSL_CONF: '/dev/null',
+          },
+        },
+        format: 'A4', // Adjust format as needed ('A4', 'Legal', etc.)
+        border: {
+          top: '20px',    // Optional: Adjust top border margin
+          right: '20px',  // Optional: Adjust right border margin
+          bottom: '20px', // Optional: Adjust bottom border margin
+          left: '20px'    // Optional: Adjust left border margin
+        },
         footer: {
-          height: '20mm',
+          height: '20mm', // Optional: Adjust footer height
           contents: {
             default: `<div style="text-align: center; font-size: 10px;">Ultima atualização em ${new Date().toLocaleString()}</div>`
           }
-        }
+        },
+        // Additional options as needed
       };
 
       const pdfPath = path.resolve('public', 'pdf', `stockoff_${name}.pdf`);

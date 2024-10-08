@@ -1,39 +1,10 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <meta charset="UTF-8">
   <title>Stock Off</title>
   <style>
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      max-width: 800px;
-      margin: 0 auto;
-      margin-top: 20px;
-    }
-
-    th,
-    td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: left;
-    }
-
-    th {
-      background-color: #d9d9d9;
-      color: rgb(0, 0, 0);
-    }
-
-    @page {
-      size: A4;
-      margin: 5;
-    }
-
-    body {
-      margin: 0;
-    }
-
+    /* Adjustments for PDF generation */
     .header {
       width: 100%;
       height: 100px;
@@ -45,10 +16,22 @@
       align-items: center;
       padding: 0 20px;
     }
-
     .header-text {
       color: white;
       font-size: 18px;
+    }
+    table {
+      page-break-inside: avoid; /* Avoid breaking table rows across pages */
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
     }
 
     /* CSS for screen display */
@@ -63,21 +46,23 @@
       .screen-only {
         display: none; /* Hide elements with the "screen-only" class when printing */
       }
+      table {
+        page-break-inside: avoid; /* Avoid breaking table rows across pages */
+      }
     }
+
   </style>
 </head>
-
 <body>
+  <!-- Header section -->
   <div class="header">
     <div class="header-text">
-      <%= routeName %> ®
-      <br>
+      <%= routeName %> ® <br>
       STOCK OFF
     </div>
   </div>
-</body>
 
-
+  <!-- Table section -->
   <table>
     <thead>
       <tr>
@@ -88,17 +73,25 @@
     </thead>
     <tbody>
       <% if (data && data.row) { %>
-        <% data.row.forEach(item=> { %>
+        <% data.row.forEach((item, index) => { %>
+          <% if (index % 30 === 0 && index !== 0) { %>
+            </tbody>
+          </table>
+          <div style="page-break-before: always;"></div>
+          <table>
+            <thead>
+              <tr>
+                <th>Código Material</th>
+                <th>Descrição</th>
+                <th>Quantidade (m)</th>
+              </tr>
+            </thead>
+            <tbody>
+          <% } %>
           <tr>
-            <td>
-              <%= item.sap_code %>
-            </td>
-            <td>
-              <%= item.description %>
-            </td>
-            <td>
-              <%= item.quantity %>
-            </td>
+            <td><%= item.sap_code %></td>
+            <td><%= item.description %></td>
+            <td><%= item.quantity %></td>
           </tr>
         <% }); %>
       <% } %>
@@ -108,8 +101,5 @@
   <!-- Download link only visible on screen -->
   <a href="/download-pdf" target="_blank" class="screen-only">Download PDF</a>
 
-  <!-- Upload link only visible on screen -->
-  
 </body>
-
 </html>

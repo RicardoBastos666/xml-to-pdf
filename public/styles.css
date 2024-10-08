@@ -13,7 +13,7 @@ td {
 }
 
 th {
-    background-color: #d9d9d9;
+    background-color: hwb(0 24% 15%);
     color: rgb(0, 0, 0);
 }
 
