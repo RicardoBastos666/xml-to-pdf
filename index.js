@@ -1,7 +1,7 @@
 /** 
  * (c) 2023 Ricardo Bastos All Rights Reserverd
  **/
-const myPath = "/mnt/vicaim02/stock_off/"
+const myPath = "/mnt/vicaim02/download/stock_off/"
 const express = require('express');
 const xml2js = require('xml2js');
 //const PDFDocument = require('pdfkit');
@@ -12,24 +12,22 @@ const path = require('path');
 const FTPClient = require('ftp');
 const cron = require('node-cron');
 const axios = require('axios');
-//const xmlLocation = "\\\\vicaim02\\download\\stock_off\\info_stocks.xml";
-//const xmlLocation = ".\\info_stocks_decordorshd.xml";
-const decordorSHDXml = myPath + "stockoff_decordorSHD.xml";
-const decordor3DXml = myPath + "stockoff_decordor3D.xml";
-const decordorHDXml = myPath + "stockoff_decordorHD.xml";
-const decordorSDXml = myPath + "stockoff_decordorSD.xml";
-const naturdorXml = myPath + "stockoff_naturdor.xml";
-const embossedCollectionXml = myPath + "stockoff_embossedcollection.xml";
-const orlaFoilOutrosXml = myPath + "STOCKOFF_FOILOUTROS.XML";
-const orlaPvcAbsXml = myPath + "STOCKOFF_PVCABS.XML";
-const orla3dXml = myPath + "STOCKOFF_3D.XML";
+const DecordorSHDXml = myPath + "stockoff_decordorSHD.xml";
+const Decordor3DXml = myPath + "stockoff_decordor3D.xml";
+const DecordorHDXml = myPath + "stockoff_decordorHD.xml";
+const DecordorSDXml = myPath + "stockoff_decordorSD.xml";
+const NaturdorXml = myPath + "stockoff_naturdor.xml";
+const EmbossedCollectionXml = myPath + "stockoff_embossedcollection.xml";
+const OrlaFoilOutrosXml = myPath + "STOCKOFF_FOILOUTROS.XML";
+const OrlaPvcAbsXml = myPath + "STOCKOFF_PVCABS.XML";
+const Orla3dXml = myPath + "STOCKOFF_3D.XML";
 
 require('dotenv').config();
 const PORT = 3000;
 
 const app = express();
-//app.use(express.static('public'));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static('public'));
+//app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 
 //upload schedule
@@ -52,9 +50,9 @@ app.get('/', (req, res) => {
     { name: 'DecordorSD', path: '/decordorSD' },
     { name: 'Naturdor', path: '/naturdor' },
     { name: 'EmbossedCollection', path: '/embossedcollection' },
-    { name: 'OrlaFoilOutros', path: '/orlafoiloutros' },
-    { name: 'OrlaPvcAbs', path: '/orlapvcabs' },
-    { name: 'Orla3D', path: '/orla3d' }
+    { name: 'orlaFoilOutros', path: '/orlafoiloutros' },
+    { name: 'orlaPvcAbs', path: '/orlapvcabs' },
+    { name: 'orla3D', path: '/orla3d' }
   ];
 
   res.render('index', { routes });
@@ -64,13 +62,13 @@ app.get('/', (req, res) => {
 
 app.get('/orlafoiloutros', (req, res) => {
   // Read the XML file
-  fs.readFile(orlaFoilOutrosXml, 'utf-8', (err, xmlData) => {
+  fs.readFile(OrlaFoilOutrosXml, 'utf-8', (err, xmlData) => {
     if (err) {
       console.error(err);
       return res.status(500).send('Error reading XML file');
     }
 
-    console.log('xmlData:', xmlData);
+    //console.log('xmlData:', xmlData);
 
     // Parse the XML data into a JavaScript object
     xml2js.parseString(xmlData, (err, result) => {
@@ -79,7 +77,7 @@ app.get('/orlafoiloutros', (req, res) => {
         return res.status(500).send('Error parsing XML data');
       }
 
-      console.log('parsed XML data:', result);
+      //console.log('parsed XML data:', result);
 
       // Render the EJS template with the data
       res.render('orlaFoilOutros', { data: result.data, routeName: 'OrlaFoilOutros' });
@@ -89,13 +87,13 @@ app.get('/orlafoiloutros', (req, res) => {
 
 app.get('/orlapvcabs', (req, res) => {
   // Read the XML file
-  fs.readFile(orlaPvcAbsXml, 'utf-8', (err, xmlData) => {
+  fs.readFile(OrlaPvcAbsXml, 'utf-8', (err, xmlData) => {
     if (err) {
       console.error(err);
       return res.status(500).send('Error reading XML file');
     }
 
-    console.log('xmlData:', xmlData);
+    //console.log('xmlData:', xmlData);
 
     // Parse the XML data into a JavaScript object
     xml2js.parseString(xmlData, (err, result) => {
@@ -104,7 +102,7 @@ app.get('/orlapvcabs', (req, res) => {
         return res.status(500).send('Error parsing XML data');
       }
 
-      console.log('parsed XML data:', result);
+      //console.log('parsed XML data:', result);
 
       // Render the EJS template with the data
       res.render('orlaPvcAbs', { data: result.data, routeName: 'OrlaPvcAbs' });
@@ -114,13 +112,13 @@ app.get('/orlapvcabs', (req, res) => {
 
 app.get('/orla3d', (req, res) => {
   // Read the XML file
-  fs.readFile(orla3dXml, 'utf-8', (err, xmlData) => {
+  fs.readFile(Orla3dXml, 'utf-8', (err, xmlData) => {
     if (err) {
       console.error(err);
       return res.status(500).send('Error reading XML file');
     }
 
-    console.log('xmlData:', xmlData);
+    //console.log('xmlData:', xmlData);
 
     // Parse the XML data into a JavaScript object
     xml2js.parseString(xmlData, (err, result) => {
@@ -129,7 +127,7 @@ app.get('/orla3d', (req, res) => {
         return res.status(500).send('Error parsing XML data');
       }
 
-      console.log('parsed XML data:', result);
+      //console.log('parsed XML data:', result);
 
       // Render the EJS template with the data
       res.render('orla3D', { data: result.data, routeName: 'Orla3D' });
@@ -141,13 +139,13 @@ app.get('/orla3d', (req, res) => {
 
 app.get('/decordorSHD', (req, res) => {
   // Read the XML file
-  fs.readFile(decordorSHDXml, 'utf-8', (err, xmlData) => {
+  fs.readFile(DecordorSHDXml, 'utf-8', (err, xmlData) => {
     if (err) {
       console.error(err);
       return res.status(500).send('Error reading XML file');
     }
 
-    console.log('xmlData:', xmlData);
+    //console.log('xmlData:', xmlData);
 
     // Parse the XML data into a JavaScript object
     xml2js.parseString(xmlData, (err, result) => {
@@ -156,17 +154,17 @@ app.get('/decordorSHD', (req, res) => {
         return res.status(500).send('Error parsing XML data');
       }
 
-      console.log('parsed XML data:', result);
+      //console.log('parsed XML data:', result);
 
       // Render the EJS template with the data
-      res.render('decordorSHD', { data: result.data, routeName: 'DecordorSHD' });
+      res.render('DecordorSHD', { data: result.data, routeName: 'DecordorSHD' });
     });
   });
 });
 
 app.get('/decordor3D', (req, res) => {
   // Read the DecordorSD XML file
-  fs.readFile(decordor3DXml, 'utf-8', (err, xmlData) => {
+  fs.readFile(Decordor3DXml, 'utf-8', (err, xmlData) => {
     if (err) {
       console.error(err);
       return res.status(500).send('Error reading Decordor3D XML file');
@@ -180,14 +178,14 @@ app.get('/decordor3D', (req, res) => {
       }
 
       // Render the DecordorSD EJS template with the data
-      res.render('decordor3D', { data: result.data, routeName: 'Decordor3D' });
+      res.render('Decordor3D', { data: result.data, routeName: 'Decordor3D' });
     });
   });
 });
 
 app.get('/decordorHD', (req, res) => {
   // Read the DecordorSD XML file
-  fs.readFile(decordorHDXml, 'utf-8', (err, xmlData) => {
+  fs.readFile(DecordorHDXml, 'utf-8', (err, xmlData) => {
     if (err) {
       console.error(err);
       return res.status(500).send('Error reading DecordorHD XML file');
@@ -201,14 +199,14 @@ app.get('/decordorHD', (req, res) => {
       }
 
       // Render the DecordorSD EJS template with the data
-      res.render('decordorHD', { data: result.data, routeName: 'DecordorHD' });
+      res.render('DecordorHD', { data: result.data, routeName: 'DecordorHD' });
     });
   });
 });
 
 app.get('/decordorSD', (req, res) => {
   // Read the DecordorSD XML file
-  fs.readFile(decordorSDXml, 'utf-8', (err, xmlData) => {
+  fs.readFile(DecordorSDXml, 'utf-8', (err, xmlData) => {
     if (err) {
       console.error(err);
       return res.status(500).send('Error reading DecordorSD XML file');
@@ -222,14 +220,14 @@ app.get('/decordorSD', (req, res) => {
       }
 
       // Render the DecordorSD EJS template with the data
-      res.render('decordorSD', { data: result.data, routeName: 'DecordorSD' });
+      res.render('DecordorSD', { data: result.data, routeName: 'DecordorSD' });
     });
   });
 });
 
 app.get('/naturdor', (req, res) => {
   // Read the DecordorSD XML file
-  fs.readFile(naturdorXml, 'utf-8', (err, xmlData) => {
+  fs.readFile(NaturdorXml, 'utf-8', (err, xmlData) => {
     if (err) {
       console.error(err);
       return res.status(500).send('Error reading naturdor XML file');
@@ -243,14 +241,14 @@ app.get('/naturdor', (req, res) => {
       }
 
       // Render the DecordorSD EJS template with the data
-      res.render('naturdor', { data: result.data, routeName: 'Naturdor' });
+      res.render('Naturdor', { data: result.data, routeName: 'Naturdor' });
     });
   });
 });
 
 app.get('/embossedcollection', (req, res) => {
   // Read the DecordorSD XML file
-  fs.readFile(embossedCollectionXml, 'utf-8', (err, xmlData) => {
+  fs.readFile(EmbossedCollectionXml, 'utf-8', (err, xmlData) => {
     if (err) {
       console.error(err);
       return res.status(500).send('Error reading embossedcollection XML file');
@@ -264,11 +262,11 @@ app.get('/embossedcollection', (req, res) => {
       }
 
       // Render the DecordorSD EJS template with the data
-      res.render('embossedcollection', { data: result.data, routeName: 'EmbossedCollection' });
+      res.render('EmbossedCollection', { data: result.data, routeName: 'EmbossedCollection' });
     });
   });
 });
-
+/*
 app.get('/download-pdf', async (req, res) => {
   const views = [
     { name: 'Decordor3D', xmlLocation: decordor3DXml },
@@ -334,20 +332,20 @@ app.get('/download-pdf', async (req, res) => {
     console.error('Error generating PDFs:', err);
     return res.status(500).send('Error generating PDFs');
   }
-});
+});*/
 
 
 app.get('/upload-pdf', async (req, res) => {
   const views = [
-    { name: 'decordor3D', xmlLocation: decordor3DXml },
-    { name: 'decordorHD', xmlLocation: decordorHDXml },
-    { name: 'decordorSD', xmlLocation: decordorSDXml },
-    { name: 'decordorSHD', xmlLocation: decordorSHDXml },
-    { name: 'embossedcollection', xmlLocation: embossedCollectionXml },
-    { name: 'naturdor', xmlLocation: naturdorXml },
-    { name: 'orlaFoilOutros', xmlLocation: orlaFoilOutrosXml },
-    { name: 'orlaPvcAbs', xmlLocation: orlaPvcAbsXml },
-    { name: 'orla3D', xmlLocation: orla3dXml },
+    { name: 'Decordor3D', xmlLocation: Decordor3DXml },
+    { name: 'DecordorHD', xmlLocation: DecordorHDXml },
+    { name: 'DecordorSD', xmlLocation: DecordorSDXml },
+    { name: 'DecordorSHD', xmlLocation: DecordorSHDXml },
+    { name: 'EmbossedCollection', xmlLocation: EmbossedCollectionXml },
+    { name: 'Naturdor', xmlLocation: NaturdorXml },
+    { name: 'orlaFoilOutros', xmlLocation: OrlaFoilOutrosXml },
+    { name: 'orlaPvcAbs', xmlLocation: OrlaPvcAbsXml },
+    { name: 'orla3D', xmlLocation: Orla3dXml },
     // Add more views as needed
   ];
 
@@ -394,15 +392,18 @@ app.get('/upload-pdf', async (req, res) => {
             OPENSSL_CONF: '/dev/null',
           },
         },
+        zoomFactor: "10",
         format: 'A4', // Adjust format as needed ('A4', 'Legal', etc.)
+        orientation: 'landscape',  // Switch orientation to landscape
+        base: 'http://172.16.0.101:3000/styles.css',
         border: {
-          top: '20px',    // Optional: Adjust top border margin
-          right: '20px',  // Optional: Adjust right border margin
-          bottom: '20px', // Optional: Adjust bottom border margin
-          left: '20px'    // Optional: Adjust left border margin
+          top: '10px',    // Optional: Adjust top border margin
+          right: '10px',  // Optional: Adjust right border margin
+          bottom: '10px', // Optional: Adjust bottom border margin
+          left: '10px'    // Optional: Adjust left border margin
         },
         footer: {
-          height: '20mm', // Optional: Adjust footer height
+          height: '20mm', // Optional: Adjust footer height   
           contents: {
             default: `<div style="text-align: center; font-size: 10px;">Ultima atualização em ${new Date().toLocaleString()}</div>`
           }
@@ -411,7 +412,7 @@ app.get('/upload-pdf', async (req, res) => {
       };
 
       const pdfPath = path.resolve('public', 'pdf', `stockoff_${name}.pdf`);
-
+      console.log(pdfPath);
       await new Promise((resolve, reject) => {
         pdf.create(renderedHtml, options).toFile(pdfPath, (err, response) => {
           if (err) {
