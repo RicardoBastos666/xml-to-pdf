@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Stock Off</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <!-- Header section -->
+  <div class="header">
+    <div class="header-text">
+      <%= routeName %> ® <br>
+      STOCK OFF
+    </div>
+  </div>
+
+  <!-- Table section -->
+  <table>
+    <thead>
+      <tr>
+        <th>Código Material</th>
+        <th>Descrição</th>
+        <th>Quantidade (m)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (data && data.row) { %>
+        <% data.row.forEach((item, index) => { %>
+          <% if (index % 30 === 0 && index !== 0) { %>
+            </tbody>
+          </table>
+          <div style="page-break-before: always;"></div>
+          <table>
+            <thead>
+              <tr>
+                <th>Código Material</th>
+                <th>Descrição</th>
+                <th>Quantidade (m)</th>
+              </tr>
+            </thead>
+            <tbody>
+          <% } %>
+          <tr>
+            <td><%= item.sap_code %></td>
+            <td><%= item.description %></td>
+            <td><%= item.quantity %></td>
+          </tr>
+        <% }); %>
+      <% } %>
+    </tbody>
+  </table>
+
+  <!-- Download link only visible on screen -->
+  <a href="/download-pdf" target="_blank" class="screen-only">Download PDF</a>
+
+</body>
+</html>

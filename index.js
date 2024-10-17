@@ -31,9 +31,9 @@ app.use(express.static('public'));
 app.set('view engine', 'ejs');
 
 //upload schedule
-cron.schedule('00 11 * * *', () => {
+cron.schedule('00 14 * * *', () => {
   // Perform the request to trigger the `/upload-pdf` route
-  axios.get('http://localhost:3000/upload-pdf')
+  axios.get('http://172.16.0.101:3000/upload-pdf')
     .then(_response => {
       console.log('PDF upload triggered successfully');
     })
